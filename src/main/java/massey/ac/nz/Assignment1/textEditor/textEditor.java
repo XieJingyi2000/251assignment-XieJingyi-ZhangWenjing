@@ -14,9 +14,14 @@ import javax.swing.*;
 import javax.swing.text.*;  
 import javax.swing.event.*;  
 import java.awt.datatransfer.*;  
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+
+
 
 public class textEditor extends JFrame implements ActionListener,DocumentListener  
 { 	
+	
 	PrintJob p=null;  //声明一个PrintJob对象 即打印
 	Graphics g=null;
 	JMenu fileMenu,editMenu,formatMenu,viewMenu,helpMenu,searchMenu; //菜单      	
@@ -147,9 +152,7 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	       popupMenu_Delete=new JMenuItem("Delete(D)");  
 	       popupMenu_SelectAll=new JMenuItem("SelectAll(A)");  
 	       popupMenu_Undo.setEnabled(false);  	 
-	     //向右键菜单添加菜单项和分隔符  
-	       popupMenu.add(popupMenu_Undo);  
-	       popupMenu.addSeparator();  
+	     //向右键菜单添加菜单项和分隔符   
 	       popupMenu.add(popupMenu_Cut);  
 	       popupMenu.add(popupMenu_Copy);  
 	       popupMenu.add(popupMenu_Paste);  
@@ -644,7 +647,7 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	           }  	           	           	        	           	           
 	       }//退出结束  
 	       //剪切  
-	       else if(e.getSource()==editMenu_Cut )  
+	       else if(e.getSource()==editMenu_Cut  || e.getSource()==popupMenu_Cut)  
 	       {   editArea.requestFocus();  
 	           String text=editArea.getSelectedText();  
 	           StringSelection selection=new StringSelection(text);  
@@ -653,7 +656,7 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	           checkMenuItemEnabled();//设置剪切，复制，粘帖，删除功能的可用性  
 	       }//剪切结束  
 	       //复制  
-	       else if(e.getSource()==editMenu_Copy )  
+	       else if(e.getSource()==editMenu_Copy || e.getSource()==popupMenu_Copy)  
 	       {   editArea.requestFocus();  
 	           String text=editArea.getSelectedText();  
 	           StringSelection selection=new StringSelection(text);  
@@ -661,7 +664,7 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	           checkMenuItemEnabled();//设置剪切，复制，粘帖，删除功能的可用性  
 	       }//复制结束  
 	       //粘帖  
-	       else if(e.getSource()==editMenu_Paste)  
+	       else if(e.getSource()==editMenu_Paste|| e.getSource()==popupMenu_Paste) 
 	       {   editArea.requestFocus();  
 	           Transferable contents=clipBoard.getContents(this);  
 	           if(contents==null)return;  
@@ -676,7 +679,7 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	           checkMenuItemEnabled();  
 	       }//粘帖结束  
 	       //删除  
-	       else if(e.getSource()==editMenu_Delete)  
+	       else if(e.getSource()==editMenu_Delete || e.getSource()==popupMenu_Paste)  
 	       {   editArea.requestFocus();  
 	           editArea.replaceRange("",editArea.getSelectionStart(),editArea.getSelectionEnd());  
 	           checkMenuItemEnabled(); //设置剪切、复制、粘贴、删除等功能的可用性    
@@ -715,7 +718,7 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	           JOptionPane.showMessageDialog(this,  
 	        		   "251Assignment1 Team Members:\n"+  
 	        	               " Xie Jinyi        ID number:19023266 \n"+  
-	        	               " Zhang Whenjing   ID number:19023266 \n"+
+	        	               " Zhang Whenjing   ID number:19023272 \n"+
 	        	               "这是一个文本编译器",  "记事本",JOptionPane.INFORMATION_MESSAGE);  
 	       }//关于结束  
 	   }//方法actionPerformed()结束  	 
@@ -737,3 +740,5 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 		
 	}
 }
+
+
