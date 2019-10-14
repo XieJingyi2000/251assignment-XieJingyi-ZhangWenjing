@@ -781,12 +781,6 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	   public static void main(String args[]) throws  NullPointerException
 	   {   textEditor notepad=new textEditor();  
 	       notepad.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	       
-	       
-	       
-
-	       
-	       
 	   }
 	   public int Json()  {
 	       String path="src//main//ass1.Json";
@@ -794,14 +788,10 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	       System.out.println(s);
 	       
 //	      com.alibaba.fastjson.JSONObject jobj =JSON.parseObject(s);
-//	      int size = jobj.getIntValue("size");
-	       
-//	      JSONObject menu=jobj.getJSONObject("MenuBarBackTextColor");
-//	      String MenuBarBackTextColor = (String) menu.get("white");
-	     // String MenuBarBackGroundColor = (String) menu.get("MenuBarBackGroundColor");
-	      return 1;
-	      //System.out.println("MenuBarBackTextColor:"+MenuBarBackTextColor);
-	    //  System.out.println("MenuBarBackGroundColor:"+MenuBarBackGroundColor);     
+//	      int size = jobj.getIntValue("size");    
+
+	      return 20;
+
 	   }//main ends
 	
 	public static String readFileByLines(String fileName) {
