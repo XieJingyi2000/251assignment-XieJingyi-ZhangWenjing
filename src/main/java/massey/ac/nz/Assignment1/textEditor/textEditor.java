@@ -3,19 +3,65 @@
  * @author xiejingyi
  */
 package massey.ac.nz.Assignment1.textEditor;
-import java.awt.*; 
-import java.awt.event.*;  
-import java.text.*;  
-import java.util.*;  
-import java.io.*;  
-import javax.swing.undo.*;  
-import javax.swing.border.*;  
-import javax.swing.*;  
-import javax.swing.text.*;  
-import javax.swing.event.*;  
-import java.awt.datatransfer.*;  
-import com.alibaba.fastjson.JSON;
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.FlowLayout;
+import java.awt.Graphics;
+import java.awt.GridLayout;
+import java.awt.PrintJob;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
 import com.alibaba.fastjson.JSONObject;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONException;
 
 
 
@@ -737,8 +783,10 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	}
 	public void changedUpdate(DocumentEvent e) {
 		// TODO Auto-generated method stub
-		
 	}
+	
+
 }
+
 
 
