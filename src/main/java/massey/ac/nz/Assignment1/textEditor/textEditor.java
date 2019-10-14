@@ -3,46 +3,104 @@
  * @author xiejingyi
  */
 package massey.ac.nz.Assignment1.textEditor;
-import java.awt.*; 
-import java.awt.event.*;  
-import java.text.*;  
-import java.util.*;  
-import java.io.*;  
-import javax.swing.undo.*;  
-import javax.swing.border.*;  
-import javax.swing.*;  
-import javax.swing.text.*;  
-import javax.swing.event.*;  
-import java.awt.datatransfer.*;  
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.GridLayout;
+import java.awt.PrintJob;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Map;
+
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONException;
+import net.sf.json.util.JSONUtils;
+
+
+
+
 
 public class textEditor extends JFrame implements ActionListener,DocumentListener  
 { 	
-	PrintJob p=null;  //声明一个PrintJob对象 即打印
+	
+	PrintJob p=null;  //Declare a PrintJob object , prints
 	Graphics g=null;
-	JMenu fileMenu,editMenu,formatMenu,viewMenu,helpMenu,searchMenu; //菜单      	
-	JPopupMenu popupMenu;    //右键弹出菜单项  
-	JMenuItem popupMenu_Undo,popupMenu_Cut,popupMenu_Copy,popupMenu_Paste,popupMenu_Delete,popupMenu_SelectAll;	
-	JMenuItem fileMenu_New,fileMenu_Open,fileMenu_Save,fileMenu_SaveAs,fileMenu_PageSetUp,fileMenu_Print,fileMenu_Exit; //“文件”的菜单项  
-	JMenuItem editMenu_Cut,editMenu_Copy,editMenu_Paste,editMenu_Delete,editMenu_Find,editMenu_FindNext,editMenu_GoTo,editMenu_SelectAll,editMenu_TimeDate;  //“编辑”的菜单项  	
-	JCheckBoxMenuItem viewMenu_Status;  //“查看”的菜单项  	
-	JMenuItem helpMenu_HelpTopics,helpMenu_AboutNotepad; //“帮助”的菜单项   	
-	JMenuItem searchMenu_Search;//"查找"的菜单项	
-	JTextArea editArea;  //“文本”编辑区域  	
-	JLabel statusLabel;  //状态栏标签   
-	Toolkit toolkit=Toolkit.getDefaultToolkit(); //系统剪贴板   
+	JMenu fileMenu,editMenu,formatMenu,viewMenu,helpMenu,searchMenu; //menu  
+	
+	JPopupMenu popupMenu;    //Right-click the pop-up menu item  
+	JMenuItem popupMenu_Cut,popupMenu_Copy,popupMenu_Paste,popupMenu_Delete,popupMenu_SelectAll;	
+	JMenuItem fileMenu_New,fileMenu_Open,fileMenu_Save,fileMenu_SaveAs,fileMenu_PageSetUp,fileMenu_Print,fileMenu_Exit; //File menu item 
+	JMenuItem editMenu_Cut,editMenu_Copy,editMenu_Paste,editMenu_Delete,editMenu_Find,editMenu_FindNext,editMenu_GoTo,editMenu_SelectAll,editMenu_TimeDate;  //Edit menu item
+	JCheckBoxMenuItem viewMenu_Status;  //View menu item 	
+	JMenuItem helpMenu_HelpTopics,helpMenu_AboutNotepad; //Help menu item   	
+	JMenuItem searchMenu_Search;//Search menu item	
+	JTextArea editArea;  //Text edit area  	
+	JLabel statusLabel;  //Status bar label
+	Toolkit toolkit=Toolkit.getDefaultToolkit(); //System clipboard
 	Clipboard clipBoard=toolkit.getSystemClipboard();
 	//其他变量  
-	String oldValue;//存放编辑区原来的内容，用于比较文本是否有改动  
-	boolean isNewFile=true;//是否新文件(未保存过的)  
-	File currentFile;//当前文件名 
-	//构造函数开始  
+	String oldValue;//Store the original contents of the edit area to compare whether the text has changed
+	boolean isNewFile=true;//New file (not saved)  
+	File currentFile;//Current filename
+	//Constructor start
 	public textEditor(){     
-		super("Text Editor"); 
-		//创建菜单条  
+		super("Text Editor");   
 	    JMenuBar menuBar=new JMenuBar(); 
-	    //创建文件菜单及菜单项并注册事件监听  
-	    fileMenu=new JMenu("File(F)");  
-	    fileMenu.setMnemonic('F');//设置快捷键ALT+F  
+	    //Create file menu and menu items and register event listeners 
+	    fileMenu=new JMenu("File(F)"); 
+	    fileMenu.setMnemonic('F');//Set ALT+F 
 	    fileMenu_New=new JMenuItem("New(N)");  
 	    fileMenu_New.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,InputEvent.CTRL_MASK));  
 	    fileMenu_New.addActionListener(this);  	 
@@ -59,15 +117,15 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	    fileMenu_Print.addActionListener(this);  	 
 	    fileMenu_Exit=new JMenuItem("Exit(X)");  
 	    fileMenu_Exit.addActionListener(this); 
-	  //创建查找菜单及菜单项并注册事件监听
+	  //Create a search menu and menu items and register event listeners
 	    searchMenu=new JMenu("Search(S)");
-	    searchMenu.setMnemonic('S');//设置快捷键ALT+E  
+	    searchMenu.setMnemonic('S');//Set ALT+E  
 	    searchMenu_Search=new JMenuItem("Search(S)...");  
 	    searchMenu_Search.setAccelerator(KeyStroke.getKeyStroke  (KeyEvent.VK_F,InputEvent.CTRL_MASK));  
 	    searchMenu_Search.addActionListener(this);  
-	  //创建编辑菜单及菜单项并注册事件监听  
+	  //Create a edit menu and menu items and register event listeners
 	    editMenu=new JMenu("Edit(E)");  
-	    editMenu.setMnemonic('E');//设置快捷键ALT+E  	  	 
+	    editMenu.setMnemonic('E');//set ALT+E  	  	 
 	    editMenu_Cut=new JMenuItem("Cut(T)");  
 	    editMenu_Cut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X,InputEvent.CTRL_MASK));  
 	    editMenu_Cut.addActionListener(this);  	 
@@ -86,107 +144,106 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	    editMenu_TimeDate = new JMenuItem("TimeDate(D)",'D');  
 	    editMenu_TimeDate.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F5,0));  
 	    editMenu_TimeDate.addActionListener(this);  	 
-	  //创建查看菜单及菜单项并注册事件监听  
+	  //Create view menu and menu items and register event listeners
 	    viewMenu=new JMenu("View(V)");  
-	    viewMenu.setMnemonic('V');//设置快捷键ALT+V  
+	    viewMenu.setMnemonic('V');//set ALT+V  
 	    viewMenu_Status=new JCheckBoxMenuItem("Status(S)");  
-	    viewMenu_Status.setMnemonic('S');//设置快捷键ALT+S  
+	    viewMenu_Status.setMnemonic('S');//set ALT+S  
 	    viewMenu_Status.setState(true);  
 	    viewMenu_Status.addActionListener(this); 
-	  //创建帮助菜单及菜单项并注册事件监听  
+	  //Create help menus and menu items and register event listeners
 	       helpMenu = new JMenu("Help(H)");  
-	       helpMenu.setMnemonic('H');//设置快捷键ALT+H   	 
+	       helpMenu.setMnemonic('H');//set ALT+H   	 
 	       helpMenu_AboutNotepad = new JMenuItem("About(A)");   
 	       helpMenu_AboutNotepad.addActionListener(this);  	    
-	   //向菜单条添加"文件"菜单及菜单项  
+	   //Adds a file menu and menu item to the menu bar 
 	       menuBar.add(fileMenu);   
 	       fileMenu.add(fileMenu_New);   
 	       fileMenu.add(fileMenu_Open);   
 	       fileMenu.add(fileMenu_Save);   
 	       fileMenu.add(fileMenu_SaveAs);   
-	       fileMenu.addSeparator();        //分隔线     
+	       fileMenu.addSeparator();            
 	       fileMenu.add(fileMenu_Print);   
-	       fileMenu.addSeparator();        //分隔线   
+	       fileMenu.addSeparator();        
 	       fileMenu.add(fileMenu_Exit);  
-	    //向菜单条添加"查找"菜单及菜单项 
+	    //Adds a search menu and menu item to the menu bar
 	       menuBar.add(searchMenu);  
 	       searchMenu.add(searchMenu_Search); 
-	    //向菜单条添加"编辑"菜单及菜单项   
+	    //Adds a edit menu and menu item to the menu bar
 	       menuBar.add(editMenu);       
-	       editMenu.addSeparator();        //分隔线   
+	       editMenu.addSeparator();       
 	       editMenu.add(editMenu_Cut);   
 	       editMenu.add(editMenu_Copy);   
 	       editMenu.add(editMenu_Paste);   
 	       editMenu.add(editMenu_Delete);     
-	       editMenu.addSeparator();        //分隔线  
+	       editMenu.addSeparator();      
 	       editMenu.add(editMenu_SelectAll);   
 	       editMenu.add(editMenu_TimeDate);  
-	    //向菜单条添加"查看"菜单及菜单项   
+	    //Adds a view menu and menu item to the menu bar
 	       menuBar.add(viewMenu);   
 	       viewMenu.add(viewMenu_Status);  	 
-	     //向菜单条添加"帮助"菜单及菜单项  
+	     //Adds a help menu and menu item to the menu bar
 	       menuBar.add(helpMenu);  
 	       helpMenu.add(helpMenu_AboutNotepad);  	    
-	     //向窗口添加菜单条                
+	     //Add a menu bar to the window            
 	       this.setJMenuBar(menuBar);  	    
-	     //创建文本编辑区并添加滚动条  
+	     //Create a text editing area and add a scroll bar
 	       editArea=new JTextArea(20,50);  
 	       JScrollPane scroller=new JScrollPane(editArea);  
 	       scroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);  
-	       this.add(scroller,BorderLayout.CENTER);//向窗口添加文本编辑区  
-	       editArea.setWrapStyleWord(true);//设置单词在一行不足容纳时换行  
-	       editArea.setLineWrap(true);//设置文本编辑区自动换行默认为true,即会"自动换行"  
-	       //this.add(editArea,BorderLayout.CENTER);//向窗口添加文本编辑区  
-	       oldValue=editArea.getText();//获取原文本编辑区的内容        
-	       //创建右键弹出菜单  
+	       this.add(scroller,BorderLayout.CENTER);//Adds a text editing area to the window
+	       editArea.setWrapStyleWord(true);//Sets the word to wrap when a line is not large enough
+	       editArea.setLineWrap(true);
+	       
+	       Font f = new Font(Font.DIALOG, 8, Json());
+	       editArea.setFont(f);
+	       oldValue=editArea.getText();//Gets the content of the original text edit area  
+	       //Create a right-click pop-up menu
 	       popupMenu=new JPopupMenu();  
-	       popupMenu_Undo=new JMenuItem("Undo(U)");  
 	       popupMenu_Cut=new JMenuItem("Cut(T)");  
 	       popupMenu_Copy=new JMenuItem("Copy(C)");  
 	       popupMenu_Paste=new JMenuItem("Paste(P)");  
 	       popupMenu_Delete=new JMenuItem("Delete(D)");  
 	       popupMenu_SelectAll=new JMenuItem("SelectAll(A)");  
-	       popupMenu_Undo.setEnabled(false);  	 
-	     //向右键菜单添加菜单项和分隔符  
-	       popupMenu.add(popupMenu_Undo);  
-	       popupMenu.addSeparator();  
+
+	     //Adds menu items and delimiters to the right-click menu
 	       popupMenu.add(popupMenu_Cut);  
 	       popupMenu.add(popupMenu_Copy);  
 	       popupMenu.add(popupMenu_Paste);  
 	       popupMenu.add(popupMenu_Delete);  
 	       popupMenu.addSeparator();  
 	       popupMenu.add(popupMenu_SelectAll);  	       
-	       //文本编辑区注册右键菜单事件  
+	       //The text edit area registers right-click menu events
 	       popupMenu_Cut.addActionListener(this);  
 	       popupMenu_Copy.addActionListener(this);  
 	       popupMenu_Paste.addActionListener(this);  
 	       popupMenu_Delete.addActionListener(this);  
-	       popupMenu_SelectAll.addActionListener(this);  	 
-	       //文本编辑区注册右键菜单事件  
+	       popupMenu_SelectAll.addActionListener(this);  	
+
 	       editArea.addMouseListener(new MouseAdapter()  {
 	    	   public void mousePressed(MouseEvent e)  {
-	              if(e.isPopupTrigger())//返回此鼠标事件是否为该平台的弹出菜单触发事件  
-	               {   popupMenu.show(e.getComponent(),e.getX(),e.getY());//在组件调用者的坐标空间中的位置 X、Y 显示弹出菜单  
+	              if(e.isPopupTrigger())//Returns whether this mouse event is triggered for the platform's pop-up menu
+	               {   popupMenu.show(e.getComponent(),e.getX(),e.getY());//Positions X and Y in the component caller's coordinate space display pop-up menus
 	               }  
-	               checkMenuItemEnabled();//设置剪切，复制，粘帖，删除等功能的可用性  
-	               editArea.requestFocus();//编辑区获取焦点  
+	               checkMenuItemEnabled();//Set the availability of cut, copy, paste, delete, etc
+	               editArea.requestFocus(); 
 	           }  
 	           public void mouseReleased(MouseEvent e)  {
-	              if(e.isPopupTrigger())//返回此鼠标事件是否为该平台的弹出菜单触发事件  
-	               {   popupMenu.show(e.getComponent(),e.getX(),e.getY());//在组件调用者的坐标空间中的位置 X、Y 显示弹出菜单  
+	              if(e.isPopupTrigger())//Returns whether this mouse event is triggered for the platform's pop-up menu
+	               {   popupMenu.show(e.getComponent(),e.getX(),e.getY());//Positions X and Y in the component caller's coordinate space display pop-up menus
 	               }  
-	               checkMenuItemEnabled();//设置剪切，复制，粘帖，删除等功能的可用性  
-	               editArea.requestFocus();//编辑区获取焦点  
+	               checkMenuItemEnabled();//Set the availability of cut, copy, paste, delete, etc
+	               editArea.requestFocus();
 	           }  
-	       });//文本编辑区注册右键菜单事件结束  	       
-	       //创建和添加状态栏  
+	       });//Text edit area register right menu event end 	       
+	       //Create and add status bars
 	       statusLabel=new JLabel("　This is the view.");  
-	       this.add(statusLabel,BorderLayout.SOUTH);//向窗口添加状态栏标签  	 
-	       //设置窗口在屏幕上的位置、大小和可见性   
+	       this.add(statusLabel,BorderLayout.SOUTH);//Adds a status bar label to the window	 
+	       //Sets the window's position, size, and visibility on the screen
 	       this.setLocation(100,100);  
 	       this.setSize(650,550);  
 	       this.setVisible(true);  
-	       //添加窗口监听器  
+	       //Add a window listener
 	       addWindowListener(new WindowAdapter()  
 	       {   public void windowClosing(WindowEvent e)  
 	           {   exitWindowChoose();  
@@ -194,8 +251,8 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	       });  	 
 	       checkMenuItemEnabled();  
 	       editArea.requestFocus();  
-	   }//构造函数textEditor结束  	     
- //设置菜单项的可用性：剪切，复制，粘帖，删除功能  
+	   }//The constructor textEditor ends     
+ //Set the availability of menu items: cut, copy, paste, delete functions
 	   public void checkMenuItemEnabled()  
 	   {   String selectText=editArea.getSelectedText();  
 	       if(selectText==null)  
@@ -213,7 +270,7 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	           editMenu_Delete.setEnabled(true);  
 	           popupMenu_Delete.setEnabled(true);  
 	       }  
-	       //粘帖功能可用性判断  
+	       //Paste function usability judgment
 	       Transferable contents=clipBoard.getContents(this);  
 	       if(contents==null)  
 	       {   editMenu_Paste.setEnabled(false);  
@@ -222,8 +279,8 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	       {   editMenu_Paste.setEnabled(true);  
 	           popupMenu_Paste.setEnabled(true);     
 	       }  
-	   }//方法checkMenuItemEnabled()结束    
-	   //关闭窗口时调用  
+	   }//The checkMenuItemEnabled() method ends
+	   //Called when the window is closed
 	   public void exitWindowChoose() { 
 	      editArea.requestFocus();  
 	       String currentValue=editArea.getText();  
@@ -293,8 +350,8 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	           {   return;  
 	           }  
 	       }  
-	   }//关闭窗口时调用方法结束  	     
-	   //查找方法  
+	   }//Called when the window is closed ends 	     
+	   //search method 
 	   public void find()  
 	   {   final JDialog searchDialog=new JDialog(this,"查找",false);//false时允许其他窗口同时处于激活状态(即无模式)  
 	       Container con=searchDialog.getContentPane();//返回此对话框的contentPane对象      
@@ -310,26 +367,26 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	       bGroup.add(upButton);  
 	       bGroup.add(downButton);  
 	       JButton cancel=new JButton("取消");  	       
-	       //取消按钮事件处理  
+	       //Cancel button event processing
 	       cancel.addActionListener(new ActionListener()  
 	       {   public void actionPerformed(ActionEvent e)  
 	           {   searchDialog.dispose();  
 	           }  
 	       }); 	       
-	       //"查找下一个"按钮监听  
+	       //The find next button listens
 	       searchNextButton.addActionListener(new ActionListener()  
 	       {   public void actionPerformed(ActionEvent e)  
-	           {   //"区分大小写(C)"的JCheckBox是否被选中  
+	           {   //Whether the "case-sensitive (C)" JCheckBox is selected
 	               int k=0,m=0;  
 	               final String str1,str2,str3,str4,strA,strB;  
 	               str1=editArea.getText();  
 	               str2=searchText.getText();  
 	               str3=str1.toUpperCase();  
 	               str4=str2.toUpperCase();  
-	               if(matchCheckBox.isSelected())//区分大小写  
+	               if(matchCheckBox.isSelected())
 	               {   strA=str1;  
 	                   strB=str2;  
-	               }else//不区分大小写,此时把所选内容全部化成大写(或小写)，以便于查找   
+	               }else//Case-insensitive, in which case the selection is all uppercase (or lowercase) for easy lookup
 	               {   strA=str3;  
 	                   strB=str4;  
 	               }  
@@ -360,15 +417,14 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	                   }  
 	               }  
 	           }  
-	       });//"查找下一个"按钮监听结束  	       	       	       
-	       //创建"查找"对话框的界面  
+	       });//The "find next" button ends the listening      	       	       
+	       //Create an interface for the find dialog box
 	       JPanel panel1=new JPanel();  
 	       JPanel panel2=new JPanel();  
 	       JPanel panel3=new JPanel();  
 	       JPanel directionPanel=new JPanel();  
 	       directionPanel.setBorder(BorderFactory.createTitledBorder("方向"));  
-	       //设置directionPanel组件的边框;  
-	       //BorderFactory.createTitledBorder(String title)创建一个新标题边框，使用默认边框（浮雕化）、默认文本位置（位于顶线上）、默认调整 (leading) 以及由当前外观确定的默认字体和文本颜色，并指定了标题文本。  
+	       //Set the frame of the directionPanel component;
 	       directionPanel.add(upButton);  
 	       directionPanel.add(downButton);  
 	       panel1.setLayout(new GridLayout(2,1));  
@@ -382,12 +438,12 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	       con.add(panel2);  
 	       con.add(panel3);  
 	       searchDialog.setSize(410,180);  
-	       searchDialog.setResizable(false);//不可调整大小  
+	       searchDialog.setResizable(false);//non-resize
 	       searchDialog.setLocation(230,280);  
 	       searchDialog.setVisible(true);  
-	   }//查找方法结束  	     	 	         	   
+	   }//End of search method   	 	         	   
 	   public void actionPerformed(ActionEvent e)  
-	   {   //新建  
+	   {   //new  
 	       if(e.getSource()==fileMenu_New)  
 	       {   editArea.requestFocus();  
 	           String currentValue=editArea.getText();  
@@ -440,8 +496,8 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	               isNewFile=true;  
 	               oldValue=editArea.getText();  
 	           }  
-	       }//新建结束  	       
-	       //打开  
+	       }//new ends  	       
+	       //open  
 	       else if(e.getSource()==fileMenu_Open)  
 	       {   editArea.requestFocus();  
 	           String currentValue=editArea.getText();  
@@ -466,7 +522,7 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	                       {   FileWriter fw=new FileWriter(saveFileName);  
 	                           BufferedWriter bfw=new BufferedWriter(fw);  
 	                           bfw.write(editArea.getText(),0,editArea.getText().length());  
-	                           bfw.flush();//刷新该流的缓冲  
+	                           bfw.flush();//Flush the buffer of the stream
 	                           bfw.close();  
 	                           isNewFile=false;  
 	                           currentFile=saveFileName;  
@@ -546,8 +602,8 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	                   }  
 	               }  
 	           }  
-	       }//打开结束  	       
-	       //保存  
+	       }//open ends  	       
+	       //save
 	       else if(e.getSource()==fileMenu_Save)  
 	       {   editArea.requestFocus();  
 	           if(isNewFile)  
@@ -592,8 +648,8 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	               {                     
 	               }  
 	           }  
-	       }//保存结束  	       
-	       //另存为  
+	       }//save ends	       
+	       //save as  
 	       else if(e.getSource()==fileMenu_SaveAs)  
 	       {   editArea.requestFocus();  
 	           String str=null;  
@@ -623,8 +679,8 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	               {                     
 	               }                 
 	           }  
-	       }//另存为结束 	      
-	       //打印  
+	       }//save as ends	      
+	       //print
 	       else if(e.getSource()==fileMenu_Print)  
 	       {   p=getToolkit().getPrintJob(this,"ok",null);
            	   g=p.getGraphics();
@@ -632,8 +688,8 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
            	   this.printAll(g);
            	   g.dispose();
            	   p.end();
-	       }//打印结束  	       
-	       //退出  
+	       }//print ends	       
+	       //exit  
 	       else if(e.getSource()==fileMenu_Exit)  
 	       {   int exitChoose=JOptionPane.showConfirmDialog(this,"确定要退出吗?","退出提示",JOptionPane.OK_CANCEL_OPTION);  
 	           if(exitChoose==JOptionPane.OK_OPTION)  
@@ -642,26 +698,26 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	           else  
 	           {   return;  
 	           }  	           	           	        	           	           
-	       }//退出结束  
-	       //剪切  
-	       else if(e.getSource()==editMenu_Cut )  
+	       }//exit ends
+	       //cut
+	       else if(e.getSource()==editMenu_Cut  || e.getSource()==popupMenu_Cut)  
 	       {   editArea.requestFocus();  
 	           String text=editArea.getSelectedText();  
 	           StringSelection selection=new StringSelection(text);  
 	           clipBoard.setContents(selection,null);  
 	           editArea.replaceRange("",editArea.getSelectionStart(),editArea.getSelectionEnd());  
-	           checkMenuItemEnabled();//设置剪切，复制，粘帖，删除功能的可用性  
-	       }//剪切结束  
-	       //复制  
-	       else if(e.getSource()==editMenu_Copy )  
+	           checkMenuItemEnabled();//Sets the availability of cut, copy, paste, delete, and so on
+	       }//cut ends  
+	       //copy 
+	       else if(e.getSource()==editMenu_Copy || e.getSource()==popupMenu_Copy)  
 	       {   editArea.requestFocus();  
 	           String text=editArea.getSelectedText();  
 	           StringSelection selection=new StringSelection(text);  
 	           clipBoard.setContents(selection,null);  
-	           checkMenuItemEnabled();//设置剪切，复制，粘帖，删除功能的可用性  
-	       }//复制结束  
-	       //粘帖  
-	       else if(e.getSource()==editMenu_Paste)  
+	           checkMenuItemEnabled();//Sets the availability of cut, copy, paste, delete, and so on  
+	       }//copy ends  
+	       // paste
+	       else if(e.getSource()==editMenu_Paste|| e.getSource()==popupMenu_Paste) 
 	       {   editArea.requestFocus();  
 	           Transferable contents=clipBoard.getContents(this);  
 	           if(contents==null)return;  
@@ -674,56 +730,103 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	           }  
 	           editArea.replaceRange(text,editArea.getSelectionStart(),editArea.getSelectionEnd());  
 	           checkMenuItemEnabled();  
-	       }//粘帖结束  
-	       //删除  
-	       else if(e.getSource()==editMenu_Delete)  
+	       }//paste ends  
+	       //delete  
+	       else if(e.getSource()==editMenu_Delete || e.getSource()==popupMenu_Paste)  
 	       {   editArea.requestFocus();  
 	           editArea.replaceRange("",editArea.getSelectionStart(),editArea.getSelectionEnd());  
-	           checkMenuItemEnabled(); //设置剪切、复制、粘贴、删除等功能的可用性    
-	       }//删除结束  
-	       //查找  
+	           checkMenuItemEnabled(); //Sets the availability of cut, copy, paste, delete, and so on
+	       }//delete ends 
+	       //search 
 	       else if(e.getSource()==searchMenu_Search)  
 	       {   editArea.requestFocus();  
 	           find();  
-	       }//查找结束        
-	       //时间日期  
+	       }//search ends      
+	       //T / D 
 	       else if(e.getSource()==editMenu_TimeDate)  
 	       {   editArea.requestFocus(); 
 	           Calendar rightNow=Calendar.getInstance();  
 	           Date date=rightNow.getTime();  
 	           editArea.insert(date.toString(),editArea.getCaretPosition());  
-	       }//时间日期结束  
-	       //全选  
+	       }//T /D ends  
+	       //select all 
 	       else if(e.getSource()==editMenu_SelectAll)  
 	       {   editArea.selectAll();  
-	       }//全选结束  	         	     	
-	       //设置状态栏可见性  
+	       }//select all ends	         	     	
+	       //Sets the visibility of the status bar 
 	       else if(e.getSource()==viewMenu_Status)  
 	       {   if(viewMenu_Status.getState())  
 	               statusLabel.setVisible(true);  
 	           else   
 	               statusLabel.setVisible(false);  
-	       }//设置状态栏可见性结束  
-	       //帮助主题  
+	       }//Sets the visibility of the status bar ends 
+	       //help 
 	       else if(e.getSource()==helpMenu_HelpTopics)  
 	       {   editArea.requestFocus();  
 	           JOptionPane.showMessageDialog(this,"这是一个文本编译器","帮助主题",JOptionPane.INFORMATION_MESSAGE);  
-	       }//帮助主题结束  
-	       //关于  
+	       }//help ends 
+	       //about  
 	       else if(e.getSource()==helpMenu_AboutNotepad)  
 	       {   editArea.requestFocus();  
 	           JOptionPane.showMessageDialog(this,  
 	        		   "251Assignment1 Team Members:\n"+  
 	        	               " Xie Jinyi        ID number:19023266 \n"+  
-	        	               " Zhang Whenjing   ID number:19023266 \n"+
+	        	               " Zhang Whenjing   ID number:19023272 \n"+
 	        	               "这是一个文本编译器",  "记事本",JOptionPane.INFORMATION_MESSAGE);  
-	       }//关于结束  
-	   }//方法actionPerformed()结束  	 
-	   //main函数开始  
-	   public static void main(String args[])  
+	       }//about ends
+	   }//method actionPerformed() ends  	
+	   
+	   
+	   //main starts  
+	   public static void main(String args[]) throws  NullPointerException
 	   {   textEditor notepad=new textEditor();  
-	       notepad.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);//使用 System exit 方法退出应用程序  
-	   }//main函数结束  
+	       notepad.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	   }
+	   public int Json()  {
+	       String path="src//main//ass1.Json";
+	       String s = readJsonFile(path);
+	       System.out.println(s);
+	       
+//	      com.alibaba.fastjson.JSONObject jobj =JSON.parseObject(s);
+//	      int size = jobj.getIntValue("size");    
+
+	      return 20;
+
+	   }//main ends
+	
+	public static String readFileByLines(String fileName) {
+        FileInputStream file = null;
+        BufferedReader reader = null;
+        InputStreamReader inputFileReader = null;
+        String content = "";
+        String tempString = null;
+        try {
+            file = new FileInputStream(fileName);
+            inputFileReader = new InputStreamReader(file, "utf-8");
+            reader = new BufferedReader(inputFileReader);
+            // 一次读入一行，直到读入null为文件结束
+            while ((tempString = reader.readLine()) != null) {
+                content += tempString;
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e1) {
+                }
+            }
+        }
+        return content;
+    }
+ 
+	private static String readJsonFile(String path) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	public void insertUpdate(DocumentEvent e) {
 		// TODO Auto-generated method stub
 		
@@ -734,6 +837,14 @@ public class textEditor extends JFrame implements ActionListener,DocumentListene
 	}
 	public void changedUpdate(DocumentEvent e) {
 		// TODO Auto-generated method stub
-		
 	}
+	
+
+	
+	
+	
+		
 }
+
+
+
